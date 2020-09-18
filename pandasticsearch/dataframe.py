@@ -39,7 +39,7 @@ class DataFrame(object):
         self._mapping = kwargs.get('mapping', None)
         self._doc_type = kwargs.get('doc_type', None)
         self._index = kwargs.get('index', None)
-        self._compat = kwargs.get('compat', 2)
+        self._compat = kwargs.get('compat', 7)
         self._filter = kwargs.get('filter', None)
         self._groupby = kwargs.get('groupby', None)
         self._aggregation = kwargs.get('aggregation', None)
@@ -100,7 +100,7 @@ class DataFrame(object):
         doc_type = kwargs.get('doc_type', None)
         index = kwargs.get('index', None)
         url = kwargs.get('url', 'http://localhost:9200')
-        compat = kwargs.get('compat', 2)
+        compat = kwargs.get('compat', 7)
         username = kwargs.get('username', None)
         password = kwargs.get('password', None)
         verify_ssl = kwargs.get('verify_ssl', True)
@@ -108,7 +108,7 @@ class DataFrame(object):
         if index is None:
             raise ValueError('Index name must be specified')
 
-        mapping = RestClient(url, index, username, password, verify_ssl).get()
+        mapping = RestClient(url, index+"/_mapping", username, password, verify_ssl).get()
 
         if doc_type is None:
             endpoint = index + '/_search'

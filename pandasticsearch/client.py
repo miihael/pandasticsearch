@@ -2,9 +2,8 @@
 
 import json
 import sys
-import base64
-import ssl
-from six.moves import urllib
+
+import requests
 
 from pandasticsearch.errors import ServerDefinedException
 
@@ -51,37 +50,16 @@ class RestClient(object):
             password = self.password
             verify_ssl = self.verify_ssl
 
-            if params is not None:
-                url = '{0}?{1}'.format(url, urllib.parse.urlencode(params))
-
-            req = urllib.request.Request(url=url)
-
+            auth = None
             if username is not None and password is not None:
-                base64creds = base64.b64encode('%s:%s' % (username,password))
-                req.add_header("Authorization", "Basic %s" % base64creds)
-            
-            if verify_ssl is False:
-                context = ssl._create_unverified_context()
-                res = urllib.request.urlopen(req, context=context)
-            else:
-                res = urllib.request.urlopen(req)
+                auth = (username, password)
 
-            data = res.read().decode("utf-8")
-            res.close()
-        except urllib.error.HTTPError:
-            _, e, _ = sys.exc_info()
-            reason = None
-            if e.code != 200:
-                try:
-                    reason = json.loads(e.read().decode("utf-8"))
-                except (ValueError, AttributeError, KeyError):
-                    pass
-                else:
-                    reason = reason.get('error', None)
-
+            res = requests.get(url, auth=auth, params=params)
+            res.raise_for_status()
+            return res.json()
+        except:
+            reason = res.json()
             raise ServerDefinedException(reason)
-        else:
-            return json.loads(data)
 
     def post(self, data, params=None):
         """
@@ -101,35 +79,14 @@ class RestClient(object):
             password = self.password
             verify_ssl = self.verify_ssl
 
-            if params is not None:
-                url = '{0}?{1}'.format(url, urllib.parse.urlencode(params))
-
-            req = urllib.request.Request(url=url, data=json.dumps(data).encode('utf-8'),
-                                         headers={'Content-Type': 'application/json'})
-
+            auth = None
             if username is not None and password is not None:
-                base64creds = base64.b64encode('%s:%s' % (username,password))
-                req.add_header("Authorization", "Basic %s" % base64creds)
-            
-            if verify_ssl is False:
-                context = ssl._create_unverified_context()
-                res = urllib.request.urlopen(req, context=context)
-            else:
-                res = urllib.request.urlopen(req)
+                auth = (username, password)
 
-            data = res.read().decode("utf-8")
-            res.close()
-        except urllib.error.HTTPError:
-            _, e, _ = sys.exc_info()
-            reason = None
-            if e.code != 200:
-                try:
-                    reason = json.loads(e.read().decode("utf-8"))
-                except (ValueError, AttributeError, KeyError):
-                    pass
-                else:
-                    reason = reason.get('error', None)
-
+            res = requests.post(url, json=data, auth=auth, params=params)
+            res.raise_for_status()
+            return res.json()
+        except:
+            reason = res.json()
             raise ServerDefinedException(reason)
-        else:
-            return json.loads(data)
+

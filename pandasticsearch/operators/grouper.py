@@ -10,10 +10,10 @@ class Grouper(object):
         self._exclude = exclude
 
     @staticmethod
-    def from_list(l):
+    def from_list(l, size=20):
         if len(l) == 1:
-            return Grouper(l[0])
-        return Grouper(l[0], inner=Grouper.from_list(l[1:]))
+            return Grouper(l[0], size=size)
+        return Grouper(l[0], size=size, inner=Grouper.from_list(l[1:], size))
 
     def build(self):
         terms = {'field': self._field, 'size': self._size}

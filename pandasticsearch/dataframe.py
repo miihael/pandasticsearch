@@ -221,7 +221,7 @@ class DataFrame(object):
                          limit=num,
                          compat=self._compat)
 
-    def groupby(self, *cols):
+    def groupby(self, *cols, size=20):
         """
         Returns a new :class:`DataFrame <DataFrame>` object grouped by the specified column(s).
 
@@ -239,7 +239,7 @@ class DataFrame(object):
                 else:
                     raise TypeError('{0} is supposed to be str or Column'.format(col))
             names = [col.field_name() for col in columns]
-            groupby = Grouper.from_list(names).build()
+            groupby = Grouper.from_list(names, size=size).build()
 
         return DataFrame(client=self._client,
                          index=self._index,
@@ -464,7 +464,6 @@ class DataFrame(object):
 
     def _build_query(self):
         query = dict()
-
         if self._limit:
             query['size'] = self._limit
         else:
